@@ -3,7 +3,10 @@
 `json2md` validates JSON with a JSON Schema and renders it as Markdown using a
 MiniJinja template. The CLI calls the [json2md Rust library](https://docs.rs/json2md).
 
-Requires Rust 1.98 or later. Install this package from crates.io:
+Download a prebuilt binary from [GitHub Releases](https://github.com/sformisano/json2md/releases/latest).
+See [binary installation](https://github.com/sformisano/json2md/blob/main/docs/publishing.md#install-a-prebuilt-binary) for platforms and checksum verification.
+
+Or install this package from crates.io with Rust 1.98 or later:
 
 ```sh
 cargo install --locked json2md-cli

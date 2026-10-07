@@ -1,0 +1,217 @@
+name: Release binaries
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (for example, v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify release tag and workspace version
+        id: release
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          import re
+          import subprocess
+          import tomllib
+
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag):
+              raise SystemExit('Expected a stable release tag: vMAJOR.MINOR.PATCH')
+          sha = subprocess.check_output(
+              ['git', 'rev-parse', '--verify', f'refs/tags/{tag}^{{commit}}'], text=True
+          ).strip()
+          manifest = subprocess.check_output(['git', 'show', f'{sha}:Cargo.toml'], text=True)
+          version = tomllib.loads(manifest)['workspace']['package']['version']
+          if tag != f'v{version}':
+              raise SystemExit(f'Tag {tag} does not match workspace version {version}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'tag={tag}\nsha={sha}\n')
+          PYTHON
+
+  build:
+    needs: resolve
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+            suffix: ''
+          - runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            suffix: ''
+          - runner: macos-15-intel
+            target: x86_64-apple-darwin
+            suffix: ''
+          - runner: macos-15
+            target: aarch64-apple-darwin
+            suffix: ''
+          - runner: windows-2022
+            target: x86_64-pc-windows-msvc
+            suffix: .exe
+    defaults:
+      run:
+        shell: bash
+    env:
+      RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
+      TARGET: ${{ matrix.target }}
+      BINARY_SUFFIX: ${{ matrix.suffix }}
+      MACOSX_DEPLOYMENT_TARGET: '15.0'
+    steps:
+      - name: Preserve fixture bytes on Windows
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install 1.98.1 --profile minimal --target "$TARGET"
+      - name: Install musl tools
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes musl-tools
+      - name: Build CLI from the release commit
+        run: cargo +1.98.1 build --locked --release -p json2md-cli --bin json2md --target "$TARGET"
+      - name: Package binary and checksum
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib
+          import os
+          from pathlib import Path
+          import tarfile
+          import zipfile
+
+          target = os.environ['TARGET']
+          tag = os.environ['RELEASE_TAG']
+          binary = 'json2md' + os.environ['BINARY_SUFFIX']
+          files = {
+              binary: Path('target') / target / 'release' / binary,
+              'README.md': Path('crates/json2md-cli/README.md'),
+              'LICENSE': Path('LICENSE'),
+          }
+          dist = Path('dist')
+          dist.mkdir()
+          archive = dist / f'json2md-{tag}-{target}'
+          if os.environ['BINARY_SUFFIX']:
+              archive = archive.with_name(archive.name + '.zip')
+              with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as bundle:
+                  for name, path in files.items():
+                      bundle.write(path, name)
+          else:
+              archive = archive.with_name(archive.name + '.tar.gz')
+              with tarfile.open(archive, 'w:gz') as bundle:
+                  for name, path in files.items():
+                      bundle.add(path, arcname=name)
+          digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+          archive.with_name(archive.name + '.sha256').write_text(
+              f'{digest}  {archive.name}\n', encoding='utf-8', newline='\n'
+          )
+          PYTHON
+      - name: Exercise the extracted archive
+        run: |
+          mkdir -p target/release-smoke
+          if [[ "$BINARY_SUFFIX" == .exe ]]; then
+            unzip "dist/json2md-${RELEASE_TAG}-${TARGET}.zip" -d target/release-smoke
+          else
+            tar -xzf "dist/json2md-${RELEASE_TAG}-${TARGET}.tar.gz" -C target/release-smoke
+          fi
+          binary="$PWD/target/release-smoke/json2md${BINARY_SUFFIX}"
+          test "$("$binary" --version)" = "json2md ${RELEASE_TAG#v}"
+          "$binary" render examples/assets/note.json --schema examples/assets/note.schema.json \
+            --template examples/assets/note.j2 > target/release-smoke/note.md
+          cmp examples/assets/note.md target/release-smoke/note.md
+          "$binary" render examples/gitlab-review/finding.json --schema examples/gitlab-review/finding.schema.json \
+            --template examples/gitlab-review/finding.j2 > target/release-smoke/finding.md
+          cmp examples/gitlab-review/finding.md target/release-smoke/finding.md
+          for example in initial follow-up pending no-findings; do
+            "$binary" render "examples/gitlab-review/$example.json" --schema examples/gitlab-review/summary.schema.json \
+              --template examples/gitlab-review/summary.j2 --output "target/release-smoke/$example.md"
+            cmp "examples/gitlab-review/$example.md" "target/release-smoke/$example.md"
+          done
+          if "$binary" render examples/assets/note.json --template examples/assets/note.j2 \
+            > target/release-smoke/unchecked.md 2> target/release-smoke/error.txt; then
+            exit 1
+          fi
+          test ! -s target/release-smoke/unchecked.md
+          grep -q -- '--schema' target/release-smoke/error.txt
+          printf '{"title":42,"summary":"invalid title","changes":[]}' > target/release-smoke/invalid.json
+          cp examples/assets/note.md target/release-smoke/preserved.md
+          if "$binary" render target/release-smoke/invalid.json --schema examples/assets/note.schema.json \
+            --template examples/assets/note.j2 --output target/release-smoke/preserved.md \
+            > target/release-smoke/rejected.md 2> target/release-smoke/error.txt; then
+            exit 1
+          fi
+          test ! -s target/release-smoke/rejected.md
+          grep -q '/title' target/release-smoke/error.txt
+          cmp examples/assets/note.md target/release-smoke/preserved.md
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cli-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [resolve, build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
+      RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: cli-*
+          path: dist
+          merge-multiple: true
+      - name: Create draft, verify uploaded bytes, and publish
+        run: |
+          cd dist
+          for checksum in *.sha256; do sha256sum --check "$checksum"; done
+          cat > release-notes.md <<EOF
+          json2md validates JSON with JSON Schema and renders Markdown using MiniJinja templates.
+
+          Download the archive for your operating system and architecture, verify its matching .sha256 file, and extract the binary onto your PATH.
+          Archives include the CLI README and license texts. Linux binaries use musl. macOS binaries require macOS 15 or later.
+
+          Source commit: ${RELEASE_SHA}
+          Installation and usage: https://github.com/sformisano/json2md#render-files-with-the-cli
+          EOF
+          gh release create "$RELEASE_TAG" --verify-tag --draft --title "json2md $RELEASE_TAG" \
+            --notes-file release-notes.md
+          gh release upload "$RELEASE_TAG" ./*.tar.gz ./*.zip ./*.sha256
+          gh release download "$RELEASE_TAG" --dir downloaded --pattern 'json2md-*'
+          cd downloaded
+          for checksum in *.sha256; do sha256sum --check "$checksum"; done
+          gh release edit "$RELEASE_TAG" --draft=false

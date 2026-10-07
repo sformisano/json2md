@@ -200,7 +200,11 @@ for schema drafts, numeric limits, errors, and trust boundaries.
 ## Render files with the CLI
 
 The command-line tool uses the same library to render files.
-Install the `json2md-cli` package from crates.io. Its binary is named `json2md`:
+Download a prebuilt binary from [GitHub Releases](https://github.com/sformisano/json2md/releases/latest).
+See [binary installation](https://github.com/sformisano/json2md/blob/main/docs/publishing.md#install-a-prebuilt-binary) for platforms and checksum verification.
+
+Or install the `json2md-cli` package from crates.io with Rust 1.98 or later.
+Its binary is named `json2md`:
 
 ```sh
 cargo install --locked json2md-cli
