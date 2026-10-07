@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "changes": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["title", "summary", "changes"],
+  "additionalProperties": false
+}

@@ -1,0 +1,41 @@
+name: Rust
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Install Rust
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+      - name: Check formatting
+        run: cargo +1.98.1 fmt --all -- --check
+      - name: Run tests
+        run: cargo +1.98.1 test --locked --workspace --all-targets
+      - name: Run documentation tests
+        run: cargo +1.98.1 test --locked --workspace --doc
+      - name: Check behavior with unified dependency features
+        run: cargo +1.98.1 test --locked -p json2md --all-targets --features jsonschema/resolve-file,minijinja/multi_template,minijinja/macros,serde_json/arbitrary_precision
+      - name: Check lints
+        run: cargo +1.98.1 clippy --locked --workspace --all-targets -- -D warnings
+      - name: Build API documentation
+        run: cargo +1.98.1 doc --locked --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - name: Compare example output
+        run: |
+          cargo +1.98.1 run --locked --quiet -p json2md --example render > rendered.md
+          diff -u examples/assets/note.md rendered.md
+          cargo +1.98.1 run --locked --quiet -p json2md --example gitlab_review > gitlab-review.md
+          diff -u examples/gitlab-review/follow-up.md gitlab-review.md
+          cargo +1.98.1 run --locked --quiet -p json2md-cli -- render examples/assets/note.json \
+            --schema examples/assets/note.schema.json --template examples/assets/note.j2 > cli-note.md
+          cmp examples/assets/note.md cli-note.md
+      - name: Verify release packages
+        run: cargo +1.98.1 package --locked --workspace

@@ -1,0 +1,9 @@
+# {{ title }}
+
+{% for section in sections %}## {{ section.name }}
+{% if section.owner is defined %}Owner: {{ section.owner }}
+{% endif %}
+{% for finding in section.findings %}- **{{ finding.rule }}**: {{ finding.result }}
+{% for detail in finding.details %}  - {{ detail }}
+{% endfor %}{% endfor %}
+{% endfor %}Verdict: **{{ verdict }}**

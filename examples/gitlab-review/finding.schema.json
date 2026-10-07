@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["severity", "title", "body", "policy", "marker"],
+  "additionalProperties": false,
+  "properties": {
+    "severity": {"enum": ["P1", "P2", "P3", "P4", "P5"]},
+    "title": {"type": "string", "minLength": 1},
+    "body": {"type": "string", "minLength": 1},
+    "disclosure": {"type": "string", "minLength": 1},
+    "policy": {
+      "type": "object",
+      "required": ["name", "invariant"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "invariant": {"type": "string", "minLength": 1}
+      }
+    },
+    "marker": {
+      "type": "object",
+      "required": ["finding_id", "round_id", "action_id"],
+      "additionalProperties": false,
+      "properties": {
+        "finding_id": {"type": "string", "pattern": "^F[1-9][0-9]*$"},
+        "round_id": {"type": "string", "pattern": "^R[1-9][0-9]*$"},
+        "action_id": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

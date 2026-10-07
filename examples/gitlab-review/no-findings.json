@@ -1,0 +1,29 @@
+{
+  "marker": {"mr": "https://gitlab.example/acme/widgets/-/merge_requests/12", "reviewer_id": 17},
+  "rounds": [{
+    "marker": {
+      "round_id": "R2",
+      "revision": {
+        "base_sha": "1111111111111111111111111111111111111111",
+        "head_sha": "2222222222222222222222222222222222222222",
+        "start_sha": "1111111111111111111111111111111111111111"
+      },
+      "mode": "full",
+      "status": "completed",
+      "policy_ids": ["rust-error-contracts"]
+    },
+    "commit": {"short_sha": "22222222", "url": "https://gitlab.example/acme/widgets/-/commit/2222222222222222222222222222222222222222"},
+    "verdict": "ready",
+    "findings": []
+  }],
+  "metadata": {
+    "workflow": "codebase-policies-review",
+    "policy_set": "rust-codebase-policies",
+    "scope": "Entire MR",
+    "depth": "Lite",
+    "range_label": "Reviewed range",
+    "base": {"short_sha": "11111111", "url": "https://gitlab.example/acme/widgets/-/commit/1111111111111111111111111111111111111111"},
+    "head": {"short_sha": "22222222", "url": "https://gitlab.example/acme/widgets/-/commit/2222222222222222222222222222222222222222"}
+  },
+  "policies": [{"name": "Rust Error Contracts", "applicable_rounds": "R2", "comments": 0}]
+}

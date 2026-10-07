@@ -1,0 +1,28 @@
+{
+  "title": "Change review",
+  "sections": [
+    {
+      "name": "Rust",
+      "owner": "Ada",
+      "findings": [
+        {
+          "rule": "errors",
+          "result": "pass",
+          "details": ["Preserves source chains.", "Invalid input returns an error."]
+        },
+        { "rule": "layout", "result": "pass", "details": [] }
+      ]
+    },
+    {
+      "name": "Docs",
+      "findings": [
+        {
+          "rule": "README",
+          "result": "pass",
+          "details": ["A runnable example matches its output."]
+        }
+      ]
+    }
+  ],
+  "verdict": "approve"
+}

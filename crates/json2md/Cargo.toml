@@ -1,0 +1,31 @@
+[package]
+name = "json2md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Validate JSON with JSON Schema and render it as Markdown"
+repository.workspace = true
+license.workspace = true
+publish.workspace = true
+readme = "../../README.md"
+documentation = "https://docs.rs/json2md"
+keywords = ["json", "json-schema", "markdown", "template", "validation"]
+categories = ["template-engine", "text-processing"]
+include = ["src/**", "README.md", "LICENSE"]
+
+[dependencies]
+jsonschema = { version = "0.58.6", default-features = false, features = ["idna"] }
+minijinja = { version = "2.24.0", default-features = false, features = ["builtins", "debug", "json", "loader", "serde"] }
+serde_json.workspace = true
+thiserror.workspace = true
+
+[[example]]
+name = "render"
+path = "../../examples/render.rs"
+
+[[example]]
+name = "gitlab_review"
+path = "../../examples/gitlab_review.rs"
+
+[lints]
+workspace = true

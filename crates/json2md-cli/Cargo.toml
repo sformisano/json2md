@@ -1,0 +1,28 @@
+[package]
+name = "json2md-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Render validated JSON as Markdown from files"
+repository.workspace = true
+license.workspace = true
+publish.workspace = true
+readme = "README.md"
+keywords = ["json", "json-schema", "markdown", "template", "validation"]
+categories = ["command-line-utilities", "text-processing"]
+include = ["src/**", "README.md", "LICENSE"]
+
+[[bin]]
+name = "json2md"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+json2md = { version = "0.1.0", path = "../json2md" }
+serde_json.workspace = true
+thiserror.workspace = true
+tempfile = "3"
+
+[lints]
+workspace = true

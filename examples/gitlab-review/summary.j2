@@ -1,0 +1,35 @@
+<!-- review-summary {{ marker | tojson }} -->
+{% for round in rounds %}{% if loop.first %}### Round {{ round.marker.round_id }} · [{{ round.commit.short_sha }}]({{ round.commit.url }}) · {{ round.verdict }}
+{% else %}<details>
+<summary>Round {{ round.marker.round_id }} · <a href="{{ round.commit.url | escape }}">{{ round.commit.short_sha }}</a> · {{ round.verdict }}</summary>
+
+{% endif %}<!-- review-round {{ round.marker | tojson }} -->
+{% if round.findings %}| ID | Finding | Severity | Status | Action |
+| --- | --- | --- | --- | --- |
+{% for finding in round.findings %}| {{ finding.id }} | [{{ finding.title }}]({{ finding.url }}) | {{ finding.severity }} | {{ finding.status }} | {{ finding.action }} |
+{% endfor %}{% endif %}{% if round.context is defined %}
+{{ round.context }}
+{% endif %}{% if not loop.first %}
+</details>
+{% endif %}
+{% endfor %}<details>
+<summary>Review metadata</summary>
+
+| Field | Value |
+| --- | --- |
+| Latest attempted round | {{ rounds[0].marker.round_id }} |
+| Review workflow | `{{ metadata.workflow }}` |
+| Policy set | `{{ metadata.policy_set }}` |
+| Review scope | {{ metadata.scope }} |
+| Review depth | {{ metadata.depth }} |
+| {{ metadata.range_label }} | [{{ metadata.base.short_sha }}]({{ metadata.base.url }}) → [{{ metadata.head.short_sha }}]({{ metadata.head.url }}) |
+
+**Policies across all review rounds**
+
+| Policy | Applicable rounds | Comments across MR |
+| --- | --- | --- |
+{% for policy in policies %}| {{ policy.name }} | {{ policy.applicable_rounds }} | {{ policy.comments }} |
+{% endfor %}
+Applicable rounds record corroborated selection. Counts cover this reviewer's distinct inline findings across the MR, including fixed and withdrawn findings. Replies and repeated rounds do not add comments.
+
+</details>

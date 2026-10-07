@@ -1,0 +1,14 @@
+{
+  "severity": "P2",
+  "title": "Preserve numeric types during rendering",
+  "body": "With `serde_json/arbitrary_precision` enabled, rendering `{\"count\":42}` treats `count` as an object and breaks `count + 1`. Convert JSON variants into native template values before rendering.",
+  "policy": {
+    "name": "Library compatibility",
+    "invariant": "Dependency features preserve supported numeric behavior."
+  },
+  "marker": {
+    "finding_id": "F7",
+    "round_id": "R3",
+    "action_id": "R3-F7-create"
+  }
+}

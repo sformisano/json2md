@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["marker", "rounds", "metadata", "policies"],
+  "additionalProperties": false,
+  "properties": {
+    "marker": {
+      "type": "object",
+      "required": ["mr", "reviewer_id"],
+      "additionalProperties": false,
+      "properties": {
+        "mr": {"type": "string", "format": "uri"},
+        "reviewer_id": {"type": "integer", "minimum": 1}
+      }
+    },
+    "rounds": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/round"}},
+    "metadata": {
+      "type": "object",
+      "required": ["workflow", "policy_set", "scope", "depth", "range_label", "base", "head"],
+      "additionalProperties": false,
+      "properties": {
+        "workflow": {"type": "string", "minLength": 1},
+        "policy_set": {"type": "string", "minLength": 1},
+        "scope": {"enum": ["Entire MR", "Focused reassessment", "Unknown"]},
+        "depth": {"enum": ["Lite", "Standard", "Full", "Unknown"]},
+        "range_label": {"enum": ["Reviewed range", "Attempted range"]},
+        "base": {"$ref": "#/$defs/commit"},
+        "head": {"$ref": "#/$defs/commit"}
+      }
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "applicable_rounds", "comments"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "applicable_rounds": {"type": "string", "minLength": 1},
+          "comments": {"oneOf": [{"type": "integer", "minimum": 0}, {"const": "Unknown"}]}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "commit": {
+      "type": "object",
+      "required": ["short_sha", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "short_sha": {"type": "string", "pattern": "^[0-9a-f]{7,12}$"},
+        "url": {"type": "string", "format": "uri"}
+      }
+    },
+    "round": {
+      "type": "object",
+      "required": ["marker", "commit", "verdict", "findings"],
+      "additionalProperties": false,
+      "properties": {
+        "marker": {
+          "type": "object",
+          "required": ["round_id", "revision", "mode", "status", "policy_ids"],
+          "additionalProperties": false,
+          "properties": {
+            "round_id": {"type": "string", "pattern": "^R[1-9][0-9]*$"},
+            "revision": {
+              "type": "object",
+              "required": ["base_sha", "head_sha", "start_sha"],
+              "additionalProperties": false,
+              "properties": {
+                "base_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+                "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+                "start_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+              }
+            },
+            "mode": {"enum": ["full", "focused"]},
+            "status": {"enum": ["pending", "completed", "partial", "superseded"]},
+            "policy_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "commit": {"$ref": "#/$defs/commit"},
+        "verdict": {"enum": ["ready", "changes required", "pending", "partial", "superseded"]},
+        "context": {"type": "string", "minLength": 1},
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "url", "severity", "status", "action"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string", "pattern": "^F[1-9][0-9]*$"},
+              "title": {"type": "string", "minLength": 1},
+              "url": {"type": "string", "format": "uri"},
+              "severity": {"enum": ["P1", "P2", "P3", "P4", "P5"]},
+              "status": {"enum": ["Open", "Fixed", "Withdrawn", "Advisory", "Uncertain"]},
+              "action": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  }
+}

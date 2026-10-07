@@ -1,0 +1,73 @@
+{
+  "marker": {"mr": "https://gitlab.example/acme/widgets/-/merge_requests/12", "reviewer_id": 17},
+  "rounds": [
+    {
+      "marker": {
+        "round_id": "R4",
+        "revision": {
+          "base_sha": "1111111111111111111111111111111111111111",
+          "head_sha": "4444444444444444444444444444444444444444",
+          "start_sha": "1111111111111111111111111111111111111111"
+        },
+        "mode": "focused",
+        "status": "completed",
+        "policy_ids": ["library-compatibility-policy"]
+      },
+      "commit": {"short_sha": "44444444", "url": "https://gitlab.example/acme/widgets/-/commit/4444444444444444444444444444444444444444"},
+      "verdict": "ready",
+      "findings": [
+        {"id": "F7", "title": "Preserve numeric types", "url": "https://gitlab.example/acme/widgets/-/merge_requests/12#note_701", "severity": "P2", "status": "Fixed", "action": "Reply added"},
+        {"id": "F10", "title": "Keep the context conversion focused", "url": "https://gitlab.example/acme/widgets/-/merge_requests/12#note_702", "severity": "P4", "status": "Advisory", "action": "None"}
+      ]
+    },
+    {
+      "marker": {
+        "round_id": "R3",
+        "revision": {
+          "base_sha": "1111111111111111111111111111111111111111",
+          "head_sha": "3333333333333333333333333333333333333333",
+          "start_sha": "1111111111111111111111111111111111111111"
+        },
+        "mode": "full",
+        "status": "completed",
+        "policy_ids": ["code-structure-policy", "library-compatibility-policy"]
+      },
+      "commit": {"short_sha": "33333333", "url": "https://gitlab.example/acme/widgets/-/commit/3333333333333333333333333333333333333333"},
+      "verdict": "changes required",
+      "findings": [
+        {"id": "F7", "title": "Preserve numeric types", "url": "https://gitlab.example/acme/widgets/-/merge_requests/12#note_701", "severity": "P2", "status": "Open", "action": "New thread"},
+        {"id": "F10", "title": "Keep the context conversion focused", "url": "https://gitlab.example/acme/widgets/-/merge_requests/12#note_702", "severity": "P4", "status": "Advisory", "action": "New thread"}
+      ]
+    },
+    {
+      "marker": {
+        "round_id": "R2",
+        "revision": {
+          "base_sha": "1111111111111111111111111111111111111111",
+          "head_sha": "2222222222222222222222222222222222222222",
+          "start_sha": "1111111111111111111111111111111111111111"
+        },
+        "mode": "full",
+        "status": "completed",
+        "policy_ids": ["rust-error-contracts"]
+      },
+      "commit": {"short_sha": "22222222", "url": "https://gitlab.example/acme/widgets/-/commit/2222222222222222222222222222222222222222"},
+      "verdict": "ready",
+      "findings": []
+    }
+  ],
+  "metadata": {
+    "workflow": "codebase-policies-review",
+    "policy_set": "rust-codebase-policies",
+    "scope": "Focused reassessment",
+    "depth": "Standard",
+    "range_label": "Reviewed range",
+    "base": {"short_sha": "11111111", "url": "https://gitlab.example/acme/widgets/-/commit/1111111111111111111111111111111111111111"},
+    "head": {"short_sha": "44444444", "url": "https://gitlab.example/acme/widgets/-/commit/4444444444444444444444444444444444444444"}
+  },
+  "policies": [
+    {"name": "Code structure", "applicable_rounds": "R3", "comments": 1},
+    {"name": "Library compatibility", "applicable_rounds": "R3, R4", "comments": 1},
+    {"name": "Rust Error Contracts", "applicable_rounds": "R2", "comments": 0}
+  ]
+}

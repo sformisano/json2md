@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "required": ["title", "body", "tags", "nested"],
+  "properties": {
+    "title": { "type": "string" },
+    "body": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "count": { "type": "integer" },
+    "nested": {
+      "type": "object",
+      "properties": { "a/b~c": { "type": "integer" } }
+    }
+  }
+}

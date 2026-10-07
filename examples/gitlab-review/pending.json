@@ -1,0 +1,30 @@
+{
+  "marker": {"mr": "https://gitlab.example/acme/widgets/-/merge_requests/12", "reviewer_id": 17},
+  "rounds": [{
+    "marker": {
+      "round_id": "R3",
+      "revision": {
+        "base_sha": "1111111111111111111111111111111111111111",
+        "head_sha": "3333333333333333333333333333333333333333",
+        "start_sha": "1111111111111111111111111111111111111111"
+      },
+      "mode": "full",
+      "status": "pending",
+      "policy_ids": ["library-compatibility-policy"]
+    },
+    "commit": {"short_sha": "33333333", "url": "https://gitlab.example/acme/widgets/-/commit/3333333333333333333333333333333333333333"},
+    "verdict": "pending",
+    "context": "The numeric dependency interaction still needs assessment.",
+    "findings": []
+  }],
+  "metadata": {
+    "workflow": "codebase-policies-review",
+    "policy_set": "rust-codebase-policies",
+    "scope": "Entire MR",
+    "depth": "Standard",
+    "range_label": "Attempted range",
+    "base": {"short_sha": "11111111", "url": "https://gitlab.example/acme/widgets/-/commit/1111111111111111111111111111111111111111"},
+    "head": {"short_sha": "33333333", "url": "https://gitlab.example/acme/widgets/-/commit/3333333333333333333333333333333333333333"}
+  },
+  "policies": [{"name": "Library compatibility", "applicable_rounds": "R3", "comments": 0}]
+}

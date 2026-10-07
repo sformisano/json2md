@@ -1,0 +1,35 @@
+{
+  "marker": {"mr": "https://gitlab.example/acme/widgets/-/merge_requests/12", "reviewer_id": 17},
+  "rounds": [{
+    "marker": {
+      "round_id": "R3",
+      "revision": {
+        "base_sha": "1111111111111111111111111111111111111111",
+        "head_sha": "3333333333333333333333333333333333333333",
+        "start_sha": "1111111111111111111111111111111111111111"
+      },
+      "mode": "full",
+      "status": "completed",
+      "policy_ids": ["code-structure-policy", "library-compatibility-policy"]
+    },
+    "commit": {"short_sha": "33333333", "url": "https://gitlab.example/acme/widgets/-/commit/3333333333333333333333333333333333333333"},
+    "verdict": "changes required",
+    "findings": [
+      {"id": "F7", "title": "Preserve numeric types", "url": "https://gitlab.example/acme/widgets/-/merge_requests/12#note_701", "severity": "P2", "status": "Open", "action": "New thread"},
+      {"id": "F10", "title": "Keep the context conversion focused", "url": "https://gitlab.example/acme/widgets/-/merge_requests/12#note_702", "severity": "P4", "status": "Advisory", "action": "New thread"}
+    ]
+  }],
+  "metadata": {
+    "workflow": "codebase-policies-review",
+    "policy_set": "rust-codebase-policies",
+    "scope": "Entire MR",
+    "depth": "Standard",
+    "range_label": "Reviewed range",
+    "base": {"short_sha": "11111111", "url": "https://gitlab.example/acme/widgets/-/commit/1111111111111111111111111111111111111111"},
+    "head": {"short_sha": "33333333", "url": "https://gitlab.example/acme/widgets/-/commit/3333333333333333333333333333333333333333"}
+  },
+  "policies": [
+    {"name": "Code structure", "applicable_rounds": "R3", "comments": 1},
+    {"name": "Library compatibility", "applicable_rounds": "R3", "comments": 1}
+  ]
+}

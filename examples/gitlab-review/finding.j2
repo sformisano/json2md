@@ -1,0 +1,10 @@
+[{{ severity }}] {{ marker.finding_id }}: {{ title }}
+
+{{ body }}
+{% if disclosure is defined %}
+{{ disclosure }}
+{% endif %}
+---
+
+*Policy: {{ policy.name }} · {{ policy.invariant }}*
+<!-- review-finding {{ marker | tojson }} -->
