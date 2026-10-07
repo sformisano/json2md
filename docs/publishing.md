@@ -69,7 +69,8 @@ Rust is not required to run these binaries.
 | Windows x86_64 | `x86_64-pc-windows-msvc` | `.zip` |
 
 Linux binaries use musl and do not require glibc. macOS binaries require macOS 15 or later.
-Windows binaries are built and exercised on Windows Server 2022.
+Windows binaries statically link the C runtime; no Visual C++ runtime installation is required.
+They are built and exercised on Windows Server 2022.
 The macOS and Windows binaries have no publisher signature or notarization.
 Each archive has a matching `.sha256` file for verifying download integrity.
 

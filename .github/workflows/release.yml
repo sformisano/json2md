@@ -99,7 +99,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes musl-tools
       - name: Build CLI from the release commit
+        env:
+          RUSTFLAGS: ${{ matrix.suffix == '.exe' && '-C target-feature=+crt-static' || '' }}
         run: cargo +1.98.1 build --locked --release -p json2md-cli --bin json2md --target "$TARGET"
+      - name: Check Windows runtime linkage
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dumpbin = & $vswhere -latest -products '*' -find 'VC\Tools\MSVC\**\bin\Hostx64\x64\dumpbin.exe' | Select-Object -First 1
+          if (!$dumpbin) { throw 'MSVC dumpbin was not found' }
+          $imports = & $dumpbin /DEPENDENTS "target/$env:TARGET/release/json2md.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'Could not inspect Windows binary dependencies' }
+          $imports
+          if ($imports -match '(?i)(vcruntime|msvcp|ucrtbase|api-ms-win-crt).*\.dll') {
+            throw 'The Windows binary requires a Visual C++ runtime DLL'
+          }
       - name: Package binary and checksum
         run: |
           python3 - <<'PYTHON'
