@@ -13,31 +13,31 @@ entries:
   slug: rust-conventions-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-semantic-types
+  slug: rust-semantic-types-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-invariant-preservation
+  slug: rust-invariant-preservation-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-data-modeling
+  slug: rust-data-modeling-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-error-contracts
+  slug: rust-error-contracts-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-error-reporting
+  slug: rust-error-reporting-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-ownership-design
+  slug: rust-ownership-design-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-abstraction-selection
+  slug: rust-abstraction-selection-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-test-design
+  slug: rust-test-design-policy
 - catalog_id: ai-skills
   kind: skill
-  slug: rust-test-harness-design
+  slug: rust-test-harness-design-policy
 - catalog_id: ai-skills
   kind: skill
   slug: code-comment-authoring
